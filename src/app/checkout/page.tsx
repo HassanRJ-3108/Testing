@@ -1,12 +1,12 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
 import { Package } from 'lucide-react'
 import { useCart } from '../contexts/CartContext'
-import products from '@/app/products/products'
+import { getAllProducts } from '../actions/actions'
 import axios from 'axios'
 
 import { Button } from "@/components/ui/button"
@@ -22,6 +22,7 @@ import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
 import { Checkbox } from "@/components/ui/checkbox"
+import { CategoryProducts, Product } from '@/types/types'
 
 const formSchema = z.object({
   fullName: z.string().min(2, {
@@ -53,6 +54,15 @@ export default function CheckoutPage() {
   const [orderId, setOrderId] = useState<string | null>(null)
   const [orderTotal, setOrderTotal] = useState(0)
   const { cart, checkout } = useCart()
+  const [allProducts, setAllProducts] = useState<CategoryProducts>({})
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      const products = await getAllProducts()
+      setAllProducts(products)
+    }
+    fetchProducts()
+  }, [])
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -69,7 +79,7 @@ export default function CheckoutPage() {
 
   const cartItemsWithDetails = cart
     .map(cartItem => {
-      const productDetails = Object.values(products)
+      const productDetails = Object.values(allProducts)
         .flatMap(category => category.products)
         .find(product => product.id === cartItem.id)
 
@@ -77,12 +87,11 @@ export default function CheckoutPage() {
         return {
           ...productDetails,
           quantity: cartItem.quantity,
-          id: productDetails.id
         }
       }
       return undefined
     })
-    .filter((item): item is (typeof products[keyof typeof products]['products'][number] & { quantity: number }) => item !== undefined)
+    .filter((item): item is (Product & { quantity: number }) => item !== undefined)
 
   const total = cartItemsWithDetails.reduce((sum, item) => sum + item.price * item.quantity, 0)
 
@@ -299,3 +308,4 @@ export default function CheckoutPage() {
     </div>
   )
 }
+

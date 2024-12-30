@@ -1,42 +1,42 @@
-import { client } from "@/sanity/lib/client";
+// import { client } from "@/sanity/lib/client";
 
 
 
-export interface Product {
-    id: number;
-    name: string;
-    category: string;
-    image: string;
-    rating: number;
-    price: number;
-    quantity?: number; 
-  }
+// export interface Product {
+//     id: number;
+//     name: string;
+//     category: string;
+//     image: string;
+//     rating: number;
+//     price: number;
+//     quantity?: number; 
+//   }
   
-  export interface CategoryProducts {
-    [key: string]: {
-      id: number;
-      name: string;
-      products: Product[];
-    };
-  }
+//   export interface CategoryProducts {
+//     [key: string]: {
+//       id: number;
+//       name: string;
+//       products: Product[];
+//     };
+//   }
   
-const products: CategoryProducts = await client.fetch(` *[_type == "category"] {
-    "id": _id,
-    name,
-    "slug": slug.current,
-    "products": *[_type == "product" && references(^._id)] {
-      "id": _id,
-      name,
-      "category": ^.name,
-      image,
-      rating,
-      price
-    }
-  }`)
+// const products: CategoryProducts = await client.fetch(` *[_type == "category"] {
+//     "id": _id,
+//     name,
+//     "slug": slug.current,
+//     "products": *[_type == "product" && references(^._id)] {
+//       "id": _id,
+//       name,
+//       "category": ^.name,
+//       image,
+//       rating,
+//       price
+//     }
+//   }`)
 
-  // console.log(products)
+//   // console.log(products)
 
-  export default products;
+//   export default products;
 
 
 

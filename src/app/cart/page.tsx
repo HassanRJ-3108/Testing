@@ -1,41 +1,53 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Cart from '@/components/Cart';
-import { useCart } from '../contexts/CartContext';
-import products, { Product } from '@/app/products/products';
+import { useCart } from '@/app/contexts/CartContext';
+import { getAllProducts } from '@/app/actions/actions';
+import { CategoryProducts, Product } from '@/types/types';
 
-interface CartItemWithQuantity extends Omit<Product, 'id'> {
+interface CartItemWithQuantity extends Product {
   quantity: number;
-  id: number;
 }
 
 const CartPage: React.FC = () => {
   const { cart } = useCart();
   const router = useRouter();
+  const [allProducts, setAllProducts] = useState<CategoryProducts>({});
+  const [cartItemsWithDetails, setCartItemsWithDetails] = useState<CartItemWithQuantity[]>([]);
 
-  const cartItemsWithDetails: CartItemWithQuantity[] = cart
-    .map(cartItem => {
-      const productDetails = Object.values(products)
-        .flatMap(category => category.products)
-        .find(product => product.id === cartItem.id);
-      
-      if (productDetails) {
-        return { 
-          ...productDetails, 
-          quantity: cartItem.quantity, 
-          id: productDetails.id
-        };
-      }
-      return undefined;
-    })
-    .filter((item): item is CartItemWithQuantity => item !== undefined);
+  useEffect(() => {
+    const fetchProducts = async () => {
+      const products = await getAllProducts();
+      setAllProducts(products);
+    };
+    fetchProducts();
+  }, []);
 
-  const totalAmount = cartItemsWithDetails.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  useEffect(() => {
+    if (Object.keys(allProducts).length > 0) {
+      const items = cart
+        .map(cartItem => {
+          const productDetails = Object.values(allProducts)
+            .flatMap(category => category.products)
+            .find(product => product.id === cartItem.id);
+          
+          if (productDetails) {
+            return { 
+              ...productDetails, 
+              quantity: cartItem.quantity
+            };
+          }
+          return undefined;
+        })
+        .filter((item): item is CartItemWithQuantity => item !== undefined);
+
+      setCartItemsWithDetails(items);
+    }
+  }, [cart, allProducts]);
 
   const handleCheckout = () => {
-    // Navigate to the checkout page
     router.push('/checkout');
   };
 
@@ -48,3 +60,4 @@ const CartPage: React.FC = () => {
 };
 
 export default CartPage;
+

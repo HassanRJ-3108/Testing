@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import Image from 'next/image';
-import { useCart } from '../app/contexts/CartContext';
-import { Product } from '../app/products/products';
+import { useCart } from '@/app/contexts/CartContext';
+import { Product } from '@/types/types';
 
 interface CartItemWithQuantity extends Product {
   quantity: number;
@@ -9,14 +9,14 @@ interface CartItemWithQuantity extends Product {
 
 interface CartProps {
   items: CartItemWithQuantity[];
-  onCheckout: () => void; // Prop to trigger checkout process
+  onCheckout: () => void; 
 }
 
 const Cart: React.FC<CartProps> = ({ items, onCheckout }) => {
   const { removeFromCart, updateQuantity } = useCart();
-  const [selectedItems, setSelectedItems] = useState<number[]>([]);
+  const [selectedItems, setSelectedItems] = useState<string[]>([]);
 
-  const toggleItemSelection = (id: number) => {
+  const toggleItemSelection = (id: string) => {
     setSelectedItems(prev => 
       prev.includes(id) ? prev.filter(item => item !== id) : [...prev, id]
     );
@@ -54,26 +54,25 @@ const Cart: React.FC<CartProps> = ({ items, onCheckout }) => {
                 <Image src={item.image} alt={item.name} width={80} height={80} className="rounded-md mr-4 mb-2 sm:mb-0" />
                 <div className="text-center sm:text-left">
                   <h3 className="font-semibold">{item.name}</h3>
-                  <p>Category: {item.category}</p>
                   <p>Price: Rs {item.price.toFixed(2)}</p>
                 </div>
               </div>
               <div className="flex items-center">
                 <button
-                  onClick={() => updateQuantity(item.id.toString(), item.quantity - 1)}
+                  onClick={() => updateQuantity(item.id, item.quantity - 1)}
                   className="bg-indigo-500 text-white px-2 py-1 rounded-l hover:bg-indigo-600"
                 >
                   -
                 </button>
                 <span className="px-4">{item.quantity}</span>
                 <button
-                  onClick={() => updateQuantity(item.id.toString(), item.quantity + 1)}
+                  onClick={() => updateQuantity(item.id, item.quantity + 1)}
                   className="bg-indigo-500 text-white px-2 py-1 rounded-r hover:bg-indigo-600"
                 >
                   +
                 </button>
                 <button
-                  onClick={() => removeFromCart(item.id.toString())}
+                  onClick={() => removeFromCart(item.id)}
                   className="ml-4 bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
                 >
                   Remove
@@ -120,3 +119,4 @@ const Cart: React.FC<CartProps> = ({ items, onCheckout }) => {
 };
 
 export default Cart;
+
